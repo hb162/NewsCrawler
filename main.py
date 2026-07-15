@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 app = FastAPI(
     title="NewsCrawler",
-    description="Crawl tin thay đổi dạng giao dịch từ HNX và HSX",
+    description="Crawl tin HNX/HSX và bài thị trường chứng khoán từ CafeF",
     version="1.0.0",
 )
 
@@ -38,10 +38,10 @@ app.include_router(router)
 
 @app.on_event("startup")
 def startup_event():
-    """Tạo bảng DB khi app khởi động."""
-    logger.info("App starting up...")
+    """Tạo các bảng trading_changes và cafef_articles khi app khởi động."""
+    logger.info("App starting up; initialising NewsCrawler tables...")
     init_db()
-    logger.info("App ready.")
+    logger.info("App ready (HNX, HSX, CafeF).")
 
 
 # ---------------------------------------------------------------------------

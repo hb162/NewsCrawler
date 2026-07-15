@@ -1,7 +1,8 @@
 """
 FastAPI routes:
-  POST /crawl/hnx  ?hours=<float>
-  POST /crawl/hsx  ?hours=<float>
+  POST /crawl/hnx    ?hours=<float>
+  POST /crawl/hsx    ?hours=<float>
+  POST /crawl/cafef  ?hours=<float>
   GET  /health
 """
 from __future__ import annotations
@@ -15,6 +16,7 @@ from app.config import DEFAULT_CRAWL_HOURS
 from app.fetchers import hnx as hnx_fetcher
 from app.fetchers import hsx as hsx_fetcher
 from app.pipeline import run_pipeline
+from app.pipeline_cafef import run_cafef_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +32,8 @@ def health():
 def crawl_hnx(
     hours: float = Query(default=DEFAULT_CRAWL_HOURS, gt=0, description="Cửa sổ thời gian (giờ)")
 ):
-    """
-    Crawl tin HNX trong `hours` giờ gần nhất.
-    Thực thi đồng bộ, trả về tóm tắt kết quả.
-    """
+    """Crawl tin HNX trong `hours` giờ gần nhất."""
     logger.info("POST /crawl/hnx hours=%.1f", hours)
-
     stats = run_pipeline(
         source="hnx",
         window_hours=hours,
@@ -52,12 +50,8 @@ def crawl_hnx(
 def crawl_hsx(
     hours: float = Query(default=DEFAULT_CRAWL_HOURS, gt=0, description="Cửa sổ thời gian (giờ)")
 ):
-    """
-    Crawl tin HSX trong `hours` giờ gần nhất.
-    Thực thi đồng bộ, trả về tóm tắt kết quả.
-    """
+    """Crawl tin HSX trong `hours` giờ gần nhất."""
     logger.info("POST /crawl/hsx hours=%.1f", hours)
-
     stats = run_pipeline(
         source="hsx",
         window_hours=hours,
@@ -68,6 +62,15 @@ def crawl_hsx(
         published_at_key="posted_at",
     )
     return JSONResponse(content=_serialize_stats(stats))
+
+
+@router.post("/crawl/cafef")
+def crawl_cafef(
+    hours: float = Query(default=DEFAULT_CRAWL_HOURS, gt=0, description="Cửa sổ thời gian (giờ)")
+):
+    """Crawl bài CafeF trong toàn bộ cửa sổ `hours` gần nhất."""
+    logger.info("POST /crawl/cafef hours=%.1f", hours)
+    return JSONResponse(content=_serialize_stats(run_cafef_pipeline(hours)))
 
 
 def _fetch_hnx_pdf_url(article_id: str) -> str | None:

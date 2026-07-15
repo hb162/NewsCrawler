@@ -8,8 +8,6 @@ import logging
 from datetime import datetime
 from typing import Any, Callable
 
-import httpx
-
 from app.config import CLASSIFY_BATCH_SIZE
 from app.db import insert_records
 from app.llm import classify_titles, extract_from_pdf
